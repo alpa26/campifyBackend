@@ -28,7 +28,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     whatsapp = models.CharField(max_length=100, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     password = models.CharField(max_length=128)  # This will be hashed
-    role_id = models.IntegerField(null=True, blank=True)  # Теперь поле может быть пустым
+    role_id = models.ForeignKey('Role', on_delete=models.CASCADE, related_name='routes',null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     is_active = models.BooleanField(default=True)
@@ -43,8 +43,82 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-    def get_full_name(self):
-        return self.username
 
-    def get_short_name(self):
-        return self.username
+class Role(models.Model):
+    role_id = models.AutoField(primary_key=True)
+    role_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.role_name
+
+
+class PointType(models.Model):
+    type_id = models.AutoField(primary_key=True)
+    type_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.type_name
+
+
+class Route(models.Model):
+    route_id = models.AutoField(primary_key=True)
+    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='routes')
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    location = models.CharField(max_length=255)
+    area = models.CharField(max_length=255)
+    difficulty = models.CharField(max_length=50)
+    chat_link = models.URLField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
+class MapPoint(models.Model):
+    point_id = models.AutoField(primary_key=True)
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='points')
+    type = models.ForeignKey(PointType, on_delete=models.SET_NULL, null=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    photo_url = models.URLField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class PointReview(models.Model):
+    review_id = models.AutoField(primary_key=True)
+    point = models.ForeignKey(MapPoint, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='point_reviews')
+    rating = models.IntegerField()
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ItemCategory(models.Model):
+    category_id = models.AutoField(primary_key=True)
+    category_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.category_name
+
+
+class Item(models.Model):
+    item_id = models.AutoField(primary_key=True)
+    category = models.ForeignKey(ItemCategory, on_delete=models.SET_NULL, null=True, related_name='items')
+    item_name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.item_name
+
+
+class Checklist(models.Model):
+    checklist_id = models.AutoField(primary_key=True)
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='checklists')
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='checklist_items')
+    quantity = models.PositiveIntegerField()
+    is_packed = models.BooleanField(default=False)
