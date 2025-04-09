@@ -45,23 +45,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Role(models.Model):
-    role_id = models.AutoField(primary_key=True)
-    role_name = models.CharField(max_length=100)
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.role_name
-
-
-class PointType(models.Model):
-    type_id = models.AutoField(primary_key=True)
-    type_name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.type_name
+        return self.name
 
 
 class Route(models.Model):
-    route_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='routes')
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -70,15 +62,33 @@ class Route(models.Model):
     difficulty = models.CharField(max_length=50)
     chat_link = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    gpx_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.name
 
+class RouteReview(models.Model):
+    id = models.AutoField(primary_key=True)
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='route_reviews')
+    rating = models.IntegerField()
+    comment = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class MapPoint(models.Model):
-    point_id = models.AutoField(primary_key=True)
+    POINT_TYPES = [
+        ('start', 'Стартовая точка'),
+        ('camp', 'Место лагеря'),
+        ('viewpoint', 'Смотровая площадка'),
+        ('water', 'Источник воды'),
+        ('danger', 'Опасная зона'),
+        ('end', 'Конечная точка'),
+        ('info', 'Информационная точка'),
+    ]
+
+    id = models.AutoField(primary_key=True)
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='points')
-    type = models.ForeignKey(PointType, on_delete=models.SET_NULL, null=True)
+    type = models.CharField(max_length=50, choices=POINT_TYPES)
     latitude = models.FloatField()
     longitude = models.FloatField()
     name = models.CharField(max_length=255)
@@ -90,7 +100,7 @@ class MapPoint(models.Model):
 
 
 class PointReview(models.Model):
-    review_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     point = models.ForeignKey(MapPoint, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='point_reviews')
     rating = models.IntegerField()
@@ -98,26 +108,30 @@ class PointReview(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class ItemCategory(models.Model):
-    category_id = models.AutoField(primary_key=True)
-    category_name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.category_name
-
-
 class Item(models.Model):
-    item_id = models.AutoField(primary_key=True)
-    category = models.ForeignKey(ItemCategory, on_delete=models.SET_NULL, null=True, related_name='items')
-    item_name = models.CharField(max_length=255)
+    ITEM_CATEGORY = [
+        ('sleeping_equipment', 'Спальное снаряжение'),
+        ('kitchen_equipment', 'Кухонное снаряжение'),
+        ('clothes', 'Одежда и обувь'),
+        ('navigation', 'Навигация'),
+        ('safety', 'Безопасность'),
+        ('food', 'Еда'),
+    ]
+
+
+    id = models.AutoField(primary_key=True)
+    category = models.CharField(max_length=50, choices=ITEM_CATEGORY)
+    name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.item_name
+        return self.name
 
 
 class Checklist(models.Model):
-    checklist_id = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='checklists')
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='checklist_items')
     quantity = models.PositiveIntegerField()
