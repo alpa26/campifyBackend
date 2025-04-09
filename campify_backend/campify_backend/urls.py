@@ -20,6 +20,7 @@ from rest_framework import permissions
 from django.urls import path, include, re_path
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from core import views
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -35,6 +36,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('', views.home_view, name='home'),  # <-- это и есть страница по умолчанию
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),
     path(

@@ -19,6 +19,9 @@ class UserDetailView(APIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
+def access_auth_view(request):
+    return render(request, 'access.html')
+
 def home_view(request):
     return render(request, 'home.html')
 
