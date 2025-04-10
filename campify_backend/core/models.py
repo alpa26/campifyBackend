@@ -98,7 +98,7 @@ class MapPoint(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='points')
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='points', null=True)
     type = models.CharField(max_length=50, choices=POINT_TYPES)
     latitude = models.FloatField()
     longitude = models.FloatField()
@@ -143,7 +143,11 @@ class Checklist(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='checklists')
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='checklist_items')
+    route_id = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='checklists')
+
+
+class ChecklistItems(models.Model):
+    checklist_id =  models.ForeignKey(Checklist, on_delete=models.CASCADE, related_name='items')
+    item_id = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='checklist_items')
     quantity = models.PositiveIntegerField()
     is_packed = models.BooleanField(default=False)
