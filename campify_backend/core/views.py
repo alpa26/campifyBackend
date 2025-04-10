@@ -477,14 +477,14 @@ class ChecklistListCreateView(generics.ListCreateAPIView):
     serializer_class = ChecklistSerializer
 
     @swagger_auto_schema(
-        operation_summary="Список чеклистов",
+        operation_summary="Список чек-листов",
         tags=["Checklist"]
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_summary="Создание нового чеклиста",
+        operation_summary="Создание нового чек-листа",
         tags=["Checklist"]
     )
     def post(self, request, *args, **kwargs):
@@ -495,28 +495,28 @@ class ChecklistRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ChecklistSerializer
 
     @swagger_auto_schema(
-        operation_summary="Получение чеклиста по id",
+        operation_summary="Получение чек-листа по id",
         tags=["Checklist"]
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_summary="Полное обновление чеклиста",
+        operation_summary="Полное обновление чек-листа",
         tags=["Checklist"]
     )
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_summary="Частичное обновление чеклиста",
+        operation_summary="Частичное обновление чек-листа",
         tags=["Checklist"]
     )
     def patch(self, request, *args, **kwargs):
         return super().patch(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_summary="Удаление чеклиста",
+        operation_summary="Удаление чек-листа",
         tags=["Checklist"]
     )
     def delete(self, request, *args, **kwargs):
@@ -531,7 +531,7 @@ class ChecklistItemsByIdView(generics.ListAPIView):
         return checklist.items.all()
 
     @swagger_auto_schema(
-        operation_summary="Список вещей чеклиста по id",
+        operation_summary="Список вещей чек-листа по id",
         tags=["Checklist"]
     )
     def get(self, request, *args, **kwargs):
