@@ -26,7 +26,6 @@ class RoleSerializer(serializers.ModelSerializer):
         model = Role
         fields = '__all__'
 
-
 class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
