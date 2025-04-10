@@ -37,6 +37,11 @@ class RouteReviewSerializer(serializers.ModelSerializer):
         model = RouteReview
         fields = '__all__'
 
+class FavoriteRouteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FavoriteRoute
+        fields = '__all__'
+
 class MapPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = MapPoint
@@ -51,7 +56,6 @@ class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = '__all__'
-
 
 class ChecklistSerializer(serializers.ModelSerializer):
     class Meta:

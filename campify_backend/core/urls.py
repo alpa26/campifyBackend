@@ -23,5 +23,5 @@ urlpatterns = [
     path('items/<int:pk>/', ItemRetrieveUpdateDestroyView.as_view(), name='item-detail'),
     path('checklists/', ChecklistListCreateView.as_view(), name='checklist-list-create'),
     path('checklists/<int:pk>/', ChecklistRetrieveUpdateDestroyView.as_view(), name='checklist-detail'),
-
+    path('favorite_route/', FavoriteRouteListCreateView.as_view(), name='favorite_route-detail'),
 ]

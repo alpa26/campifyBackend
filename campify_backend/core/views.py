@@ -65,7 +65,6 @@ class RouteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
 
-
 # RouteReview
 class RouteReviewListCreateView(generics.ListCreateAPIView):
     queryset = RouteReview.objects.all()
@@ -74,6 +73,11 @@ class RouteReviewListCreateView(generics.ListCreateAPIView):
 class RouteReviewRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = RouteReview.objects.all()
     serializer_class = RouteReviewSerializer
+
+# FavoriteRoute
+class FavoriteRouteListCreateView(generics.ListCreateAPIView):
+    queryset = FavoriteRoute.objects.all()
+    serializer_class = FavoriteRouteSerializer
 
 
 

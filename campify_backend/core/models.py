@@ -75,6 +75,17 @@ class RouteReview(models.Model):
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+class FavoriteRoute(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite_routes')
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='favorited_by')
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'route')  # чтобы не было дублей
+
+    def __str__(self):
+        return f"{self.user.username} - {self.route.name}"
+
 class MapPoint(models.Model):
     POINT_TYPES = [
         ('start', 'Стартовая точка'),
