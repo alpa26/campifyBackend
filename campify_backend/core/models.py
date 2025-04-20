@@ -57,12 +57,15 @@ class Route(models.Model):
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='routes')
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    location = models.CharField(max_length=255)
-    area = models.CharField(max_length=255)
+    locationarea = models.CharField(max_length=255)
+    length_in_km = models.FloatField(null=True)
+    duration = models.DurationField(null=True, blank=True)
     difficulty = models.CharField(max_length=50)
     chat_link = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     gpx_url = models.URLField(blank=True, null=True)
+    views = models.IntegerField(null=True)
+
 
     def __str__(self):
         return self.name
