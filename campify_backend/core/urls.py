@@ -20,6 +20,8 @@ urlpatterns = [
     path('routes/', RouteListCreateView.as_view(), name='route-list-create'),
     path('routes/<int:pk>/', RouteRetrieveUpdateDestroyView.as_view(), name='route-detail'),
     path('routes/<int:route_id>/reviews/', RouteReviewsView.as_view(), name='route-reviews'),
+    path('routes/<int:id>/upload_gpx/', UploadGpxFileView.as_view(), name='upload-gpx'),
+
 
     path('route_reviews/', RouteReviewListCreateView.as_view(), name='route_review-list-create'),
     path('route_reviews/<int:pk>/', RouteReviewRetrieveUpdateDestroyView.as_view(), name='route_review-detail'),

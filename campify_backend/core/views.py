@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
+from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -182,6 +184,13 @@ class RouteListCreateView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        # Возвращаем только ID
+        return Response({'id': serializer.instance.id}, status=status.HTTP_201_CREATED)
+
 class RouteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
@@ -213,6 +222,36 @@ class RouteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+class UploadGpxFileView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    @swagger_auto_schema(
+        operation_summary="Загрузка GPX-файла по ID маршрута",
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description="ID маршрута", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('gpx_file', openapi.IN_FORM, type=openapi.TYPE_FILE, description="GPX файл")
+        ],
+        responses={200: openapi.Response('Файл загружен')}
+    )
+    def post(self, request, id):
+        try:
+            route = Route.objects.get(id=id)
+        except Route.DoesNotExist:
+            return Response({"detail": "Маршрут не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+        gpx_file = request.FILES.get('gpx_file')
+        if not gpx_file:
+            return Response({"detail": "Файл не найден в запросе."}, status=status.HTTP_400_BAD_REQUEST)
+
+        route.gpx_url = gpx_file
+        route.save()
+
+        return Response({
+            "detail": "Файл успешно загружен",
+            "gpx_url": route.gpx_url.url
+        })
+
 
 class RouteReviewsView(generics.ListAPIView):
     serializer_class = RouteReviewSerializer

@@ -30,6 +30,9 @@ class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = '__all__'
+        extra_kwargs = {
+            'gpx_url': {'required': False, 'allow_null': True}
+        }
 
 class RouteReviewSerializer(serializers.ModelSerializer):
     class Meta:
