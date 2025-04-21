@@ -342,6 +342,93 @@ class FavoriteRouteListCreateView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
+# RoutePhoto
+class RoutePhotoListCreateView(generics.ListCreateAPIView):
+    queryset = RoutePhoto.objects.all()
+    serializer_class = RoutePhotoSerializer
+    http_method_names = ['get']
+
+    @swagger_auto_schema(
+        operation_summary="Список всех фото к маршрутам",
+        tags=["RoutePhoto"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+class UploadGpxFileView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    @swagger_auto_schema(
+        operation_summary="Загрузка GPX-файла по ID маршрута",
+        tags=["Route"],
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description="ID маршрута", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('gpx_file', openapi.IN_FORM, type=openapi.TYPE_FILE, description="GPX файл")
+        ],
+        responses={200: openapi.Response('Файл загружен')}
+    )
+    def post(self, request, id):
+        try:
+            route = Route.objects.get(id=id)
+        except Route.DoesNotExist:
+            return Response({"detail": "Маршрут не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+        gpx_file = request.FILES.get('gpx_file')
+        if not gpx_file:
+            return Response({"detail": "Файл не найден в запросе."}, status=status.HTTP_400_BAD_REQUEST)
+
+        route.gpx_url = gpx_file
+        route.save()
+
+        return Response({
+            "detail": "Файл успешно загружен",
+            "gpx_url": route.gpx_url.url
+        })
+
+
+class RoutePhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = RoutePhoto.objects.all()
+    serializer_class = RoutePhotoSerializer
+    http_method_names = ['delete']
+
+    @swagger_auto_schema(
+        operation_summary="Удалить фото маршрута",
+        tags=["RoutePhoto"]
+    )
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
+
+
+class UploadRoutePhotoView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    @swagger_auto_schema(
+        operation_summary="Загрузка изображения по ID маршрута",
+        tags=["RoutePhoto"],
+        manual_parameters=[
+            openapi.Parameter('id', openapi.IN_PATH, description="ID маршрута", type=openapi.TYPE_INTEGER),
+            openapi.Parameter('image', openapi.IN_FORM, type=openapi.TYPE_FILE, description="Фото маршрута"),
+        ],
+        responses={201: openapi.Response('Фото успешно загружено')}
+    )
+    def post(self, request, id):
+        try:
+            route = Route.objects.get(id=id)
+        except Route.DoesNotExist:
+            return Response({"detail": "Маршрут не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+        image = request.FILES.get('image')
+        if not image:
+            return Response({"detail": "Файл не найден в запросе."}, status=status.HTTP_400_BAD_REQUEST)
+
+        photo = RoutePhoto.objects.create(route=route, image=image)
+
+        return Response({
+            "detail": "Фото успешно загружено.",
+            "photo_id": photo.id,
+            "image_url": photo.image.url
+        }, status=status.HTTP_201_CREATED)
+
 # MapPoint
 class MapPointListCreateView(generics.ListCreateAPIView):
     queryset = MapPoint.objects.all()

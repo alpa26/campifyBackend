@@ -81,6 +81,12 @@ class Route(models.Model):
     def __str__(self):
         return self.name
 
+class RoutePhoto(models.Model):
+    route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='photos')
+    image = models.ImageField(upload_to='campify_backend/route_photos/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
 class RouteReview(models.Model):
     id = models.AutoField(primary_key=True)
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='reviews')

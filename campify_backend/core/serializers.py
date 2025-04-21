@@ -42,6 +42,11 @@ class RouteSerializer(serializers.ModelSerializer):
             'gpx_url': {'required': False, 'allow_null': True}
         }
 
+class RoutePhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoutePhoto
+        fields = ['id', 'route', 'image', 'uploaded_at']
+
 class RouteReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = RouteReview

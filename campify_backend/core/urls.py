@@ -22,6 +22,9 @@ urlpatterns = [
     path('routes/<int:route_id>/reviews/', RouteReviewsView.as_view(), name='route-reviews'),
     path('routes/<int:id>/upload_gpx/', UploadGpxFileView.as_view(), name='upload-gpx'),
 
+    path('route_photo/', RoutePhotoListCreateView.as_view(), name='route-photo-create'),
+    path('route_photo/<int:pk>/', RoutePhotoRetrieveUpdateDestroyView.as_view(), name='route-photo-detail'),
+    path('route_photo/<int:id>/upload_image/', UploadRoutePhotoView.as_view(), name='upload-file'),
 
     path('route_reviews/', RouteReviewListCreateView.as_view(), name='route_review-list-create'),
     path('route_reviews/<int:pk>/', RouteReviewRetrieveUpdateDestroyView.as_view(), name='route_review-detail'),
