@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from rest_framework import serializers
 from .models import *
 
@@ -27,6 +29,12 @@ class RoleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class RouteSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(default="Название маршрута")
+    description = serializers.CharField(default="Описание")
+    location_area = serializers.CharField(default="Расположение")
+    duration = serializers.DurationField(default=timedelta(minutes=30))
+    chat_link = serializers.URLField(default="http://127.0.0.1:8000/example/")
+
     class Meta:
         model = Route
         fields = '__all__'

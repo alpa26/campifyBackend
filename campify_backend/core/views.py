@@ -228,6 +228,7 @@ class UploadGpxFileView(APIView):
 
     @swagger_auto_schema(
         operation_summary="Загрузка GPX-файла по ID маршрута",
+        tags=["Route"],
         manual_parameters=[
             openapi.Parameter('id', openapi.IN_PATH, description="ID маршрута", type=openapi.TYPE_INTEGER),
             openapi.Parameter('gpx_file', openapi.IN_FORM, type=openapi.TYPE_FILE, description="GPX файл")

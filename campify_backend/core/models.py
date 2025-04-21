@@ -52,19 +52,29 @@ class Role(models.Model):
 
 
 class Route(models.Model):
+    DIFFICULTY_CHOICES = [
+        (1, 'Лёгкий'),
+        (2, 'Средний'),
+        (3, 'Сложный'),
+        (4, 'Для профессионалов'),
+    ]
+
     id = models.AutoField(primary_key=True)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='routes')
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     location_area = models.CharField(max_length=255)
     length_in_km = models.FloatField(null=True)
-    height_in_km = models.FloatField(null=True)
+    height = models.FloatField(null=True)
     duration = models.DurationField(null=True, blank=True)
-    difficulty = models.CharField(max_length=50)
+    difficulty = models.IntegerField(
+        choices=DIFFICULTY_CHOICES,
+        default=2,
+    )
     chat_link = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     views = models.IntegerField(null=True)
-    gpx_url = models.FileField()
+    gpx_url = models.FileField(upload_to='campify_backend/gpx_files/')
     create_at = models.DateTimeField(auto_now_add=True)
 
 
