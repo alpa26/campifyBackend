@@ -74,9 +74,8 @@ class Route(models.Model):
     chat_link = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     views = models.IntegerField(null=True)
-    gpx_url = models.FileField(upload_to='campify_backend/gpx_files/')
+    gpx_url = models.FileField(upload_to='gpx_files/')
     create_at = models.DateTimeField(auto_now_add=True)
-
 
     def __str__(self):
         return self.name
