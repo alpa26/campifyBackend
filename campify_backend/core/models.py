@@ -60,7 +60,7 @@ class Route(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='routes')
+    author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='routes',null=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     location_area = models.CharField(max_length=255)
