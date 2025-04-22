@@ -45,6 +45,14 @@ INSTALLED_APPS = [
     'core'
 ]
 
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'basic': {
+            'type': 'basic',
+        }
+    },
+}
+
 AUTH_USER_MODEL = 'core.User'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',

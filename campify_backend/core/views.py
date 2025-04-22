@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from drf_yasg import openapi
@@ -384,6 +384,58 @@ class UploadGpxFileView(APIView):
             "detail": "Файл успешно загружен",
             "gpx_url": route.gpx_url.url
         })
+
+
+class GPXFileDownloadView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Скачивание GPX файла маршрута",
+        tags=["Route"],
+        responses={
+            200: openapi.Response(
+                description="GPX файл",
+                schema=openapi.Schema(type=openapi.TYPE_FILE),
+            ),
+            404: "Файл не найден",
+        },
+    )
+    def get(self, request, pk):
+        try:
+            route = Route.objects.get(pk=pk)
+            gpx_file = route.gpx_url
+            if not gpx_file:
+                return Response({"detail": "Файл не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+            response = FileResponse(gpx_file.open('rb'), content_type='application/gpx+xml')
+            response['Content-Disposition'] = f'attachment; filename="{gpx_file.name}"'
+            return response
+
+        except Route.DoesNotExist:
+            return Response({"detail": "Маршрут не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class GPXFileGetView(APIView):
+
+    @swagger_auto_schema(
+        operation_summary="Получение GPX файла маршрута",
+        tags=["Route"],
+        responses={
+            200: openapi.Response(
+                description="GPX файл",
+                schema=openapi.Schema(type=openapi.TYPE_FILE),
+            ),
+            404: "Файл не найден",
+        },
+    )
+    def get(self, request, pk):
+        try:
+            route = Route.objects.get(pk=pk)
+            gpx_file = route.gpx_url
+            if not gpx_file:
+                return Response({"detail": "Файл не найден."}, status=status.HTTP_404_NOT_FOUND)
+            return FileResponse(gpx_file.open('rb'), content_type='application/gpx', filename=gpx_file.name)
+        except Route.DoesNotExist:
+            return Response({"detail": "Маршрут не найден."}, status=status.HTTP_404_NOT_FOUND)
 
 
 class RoutePhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
