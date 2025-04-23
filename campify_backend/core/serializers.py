@@ -34,6 +34,8 @@ class RouteSerializer(serializers.ModelSerializer):
     location_area = serializers.CharField(default="Расположение")
     duration = serializers.DurationField(default=timedelta(minutes=30))
     chat_link = serializers.URLField(default="http://127.0.0.1:8000/example/")
+    views = serializers.IntegerField(default=0)
+
 
     class Meta:
         model = Route

@@ -58,6 +58,10 @@ class Route(models.Model):
         (3, 'Сложный'),
         (4, 'Для профессионалов'),
     ]
+    TYPES = [
+        (1, 'Обустроенный'),
+        (2, 'Дикий')
+    ]
 
     id = models.AutoField(primary_key=True)
     author = models.ForeignKey('User', on_delete=models.CASCADE, related_name='routes',null=True)
@@ -71,9 +75,13 @@ class Route(models.Model):
         choices=DIFFICULTY_CHOICES,
         default=2,
     )
+    type = models.IntegerField(
+        choices=TYPES,
+        default=1,
+    )
     chat_link = models.URLField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    views = models.IntegerField(null=True)
+    views = models.IntegerField(null=True, default=0)
     gpx_url = models.FileField(upload_to='gpx_files/')
     create_at = models.DateTimeField(auto_now_add=True)
 

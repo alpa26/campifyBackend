@@ -481,6 +481,34 @@ class UploadRoutePhotoView(APIView):
             "image_url": photo.image.url
         }, status=status.HTTP_201_CREATED)
 
+
+class EquipRouteGetView(generics.ListAPIView):
+    serializer_class = RouteSerializer
+
+    def get_queryset(self):
+        return Route.objects.filter(type = 1)
+
+    @swagger_auto_schema(
+        operation_summary="Список оборудованных маршрутов",
+        tags=["Route"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+class WildRouteGetView(generics.ListAPIView):
+    serializer_class = RouteSerializer
+
+    def get_queryset(self):
+        return Route.objects.filter(type = 2)
+
+    @swagger_auto_schema(
+        operation_summary="Список диких маршрутов",
+        tags=["Route"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 # MapPoint
 class MapPointListCreateView(generics.ListCreateAPIView):
     queryset = MapPoint.objects.all()
