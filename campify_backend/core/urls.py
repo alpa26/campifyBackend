@@ -28,6 +28,7 @@ urlpatterns = [
 
     path('route_photo/', RoutePhotoListCreateView.as_view(), name='route-photo-create'),
     path('route_photo/<int:pk>/', RoutePhotoRetrieveUpdateDestroyView.as_view(), name='route-photo-detail'),
+    path('routes/<int:pk>/photos/', RoutePhotoByIdView.as_view(), name='route-photo-list'),
     path('route_photo/<int:id>/upload_image/', UploadRoutePhotoView.as_view(), name='upload-file'),
 
     path('route_reviews/', RouteReviewListCreateView.as_view(), name='route_review-list-create'),

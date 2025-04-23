@@ -191,6 +191,34 @@ class RouteListCreateView(generics.ListCreateAPIView):
         # Возвращаем только ID
         return Response({'id': serializer.instance.id}, status=status.HTTP_201_CREATED)
 
+class EquipRouteGetView(generics.ListAPIView):
+    serializer_class = RouteSerializer
+
+    def get_queryset(self):
+        return Route.objects.filter(type = 1)
+
+    @swagger_auto_schema(
+        operation_summary="Список оборудованных маршрутов",
+        tags=["Route"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
+class WildRouteGetView(generics.ListAPIView):
+    serializer_class = RouteSerializer
+
+    def get_queryset(self):
+        return Route.objects.filter(type = 2)
+
+    @swagger_auto_schema(
+        operation_summary="Список диких маршрутов",
+        tags=["Route"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+
 class RouteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
@@ -450,6 +478,20 @@ class RoutePhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView)
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 
+class RoutePhotoByIdView(generics.ListAPIView):
+    serializer_class = RoutePhotoSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        return RoutePhoto.objects.filter(route=pk)
+
+    @swagger_auto_schema(
+        operation_summary="Получить фото маршрута по id",
+        tags=["Route"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 
 class UploadRoutePhotoView(APIView):
     parser_classes = [MultiPartParser, FormParser]
@@ -481,33 +523,6 @@ class UploadRoutePhotoView(APIView):
             "image_url": photo.image.url
         }, status=status.HTTP_201_CREATED)
 
-
-class EquipRouteGetView(generics.ListAPIView):
-    serializer_class = RouteSerializer
-
-    def get_queryset(self):
-        return Route.objects.filter(type = 1)
-
-    @swagger_auto_schema(
-        operation_summary="Список оборудованных маршрутов",
-        tags=["Route"]
-    )
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-
-class WildRouteGetView(generics.ListAPIView):
-    serializer_class = RouteSerializer
-
-    def get_queryset(self):
-        return Route.objects.filter(type = 2)
-
-    @swagger_auto_schema(
-        operation_summary="Список диких маршрутов",
-        tags=["Route"]
-    )
-    def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
 
 # MapPoint
 class MapPointListCreateView(generics.ListCreateAPIView):
