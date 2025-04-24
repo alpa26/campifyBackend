@@ -80,10 +80,9 @@ class Route(models.Model):
         default=1,
     )
     chat_link = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
     views = models.IntegerField(null=True, default=0)
     gpx_url = models.FileField(upload_to='gpx_files/')
-    create_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -98,7 +97,7 @@ class RouteReview(models.Model):
     id = models.AutoField(primary_key=True)
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='reviews')
     user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='route_reviews')
-    rating = models.IntegerField()
+    rating = models.FloatField()
     comment = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

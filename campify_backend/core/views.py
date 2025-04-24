@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.http import JsonResponse, FileResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
@@ -170,6 +171,9 @@ class RouteListCreateView(generics.ListCreateAPIView):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
 
+    def get_queryset(self):
+        return Route.objects.annotate(average_rating=Avg('reviews__rating'))
+
     @swagger_auto_schema(
         operation_summary="Список маршрутов",
         tags=["Route"]
@@ -287,7 +291,7 @@ class RouteReviewsView(generics.ListAPIView):
 
     def get_queryset(self):
         route_id = self.kwargs['route_id']
-        return RouteReview.objects.filter(id=route_id)
+        return RouteReview.objects.filter(route=route_id)
 
     @swagger_auto_schema(
         operation_summary="Список отзывов маршрута",

@@ -35,6 +35,7 @@ class RouteSerializer(serializers.ModelSerializer):
     duration = serializers.DurationField(default=timedelta(minutes=30))
     chat_link = serializers.URLField(default="http://127.0.0.1:8000/example/")
     views = serializers.IntegerField(default=0)
+    average_rating = serializers.FloatField(read_only=True)
 
 
     class Meta:
