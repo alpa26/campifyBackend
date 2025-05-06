@@ -79,6 +79,7 @@ class Route(models.Model):
         choices=TYPES,
         default=1,
     )
+    is_public = models.BooleanField(default=True)
     chat_link = models.URLField(blank=True, null=True)
     views = models.IntegerField(null=True, default=0)
     gpx_url = models.FileField(upload_to='gpx_files/')

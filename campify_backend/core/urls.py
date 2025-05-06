@@ -25,6 +25,7 @@ urlpatterns = [
     path('routes/<int:id>/upload_gpx/', UploadGpxFileView.as_view(), name='upload-gpx'),
     path('routes/<int:pk>/gpx/', GPXFileGetView.as_view(), name='route-gpx-get'),
     path('routes/<int:pk>/download/gpx/', GPXFileDownloadView.as_view(), name='route-gpx-download'),
+    path('routes/user/<int:user_id>/', UserRouteGetView.as_view(), name='route-user'),
 
     path('route_photo/', RoutePhotoListCreateView.as_view(), name='route-photo-create'),
     path('route_photo/<int:pk>/', RoutePhotoRetrieveUpdateDestroyView.as_view(), name='route-photo-detail'),

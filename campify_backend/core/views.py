@@ -172,7 +172,7 @@ class RouteListCreateView(generics.ListCreateAPIView):
     serializer_class = RouteSerializer
 
     def get_queryset(self):
-        return Route.objects.annotate(average_rating=Avg('reviews__rating'))
+        return Route.objects.filter(is_public=True).annotate(average_rating=Avg('reviews__rating'))
 
     @swagger_auto_schema(
         operation_summary="Список маршрутов",
@@ -195,11 +195,25 @@ class RouteListCreateView(generics.ListCreateAPIView):
         # Возвращаем только ID
         return Response({'id': serializer.instance.id}, status=status.HTTP_201_CREATED)
 
+class UserRouteGetView(generics.ListAPIView):
+    serializer_class = RouteSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs['user_id']
+        return Route.objects.filter(author=user_id).annotate(average_rating=Avg('reviews__rating'))
+
+    @swagger_auto_schema(
+        operation_summary="Список маршрутов пользователя",
+        tags=["Route"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 class EquipRouteGetView(generics.ListAPIView):
     serializer_class = RouteSerializer
 
     def get_queryset(self):
-        return Route.objects.filter(type = 1)
+        return Route.objects.filter(type = 1, is_public=True)
 
     @swagger_auto_schema(
         operation_summary="Список оборудованных маршрутов",
@@ -208,12 +222,11 @@ class EquipRouteGetView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
-
 class WildRouteGetView(generics.ListAPIView):
     serializer_class = RouteSerializer
 
     def get_queryset(self):
-        return Route.objects.filter(type = 2)
+        return Route.objects.filter(type = 2, is_public=True)
 
     @swagger_auto_schema(
         operation_summary="Список диких маршрутов",
