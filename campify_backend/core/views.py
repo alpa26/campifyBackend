@@ -1,8 +1,12 @@
+import json
+
 from django.db.models import Avg
 from django.http import JsonResponse, FileResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
+from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
+from rest_framework.decorators import api_view
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.views import APIView
@@ -18,26 +22,34 @@ def access_auth_view(request):
 def home_view(request):
     return render(request, 'home.html')
 
-def register_view(request):
-    if request.method == 'POST':
-        serializer = RegisterSerializer(data=request.POST)
-        if serializer.is_valid():
-            serializer.save()
-            return redirect('login')
-    return render(request, 'register.html')
 
+@api_view(['POST'])
+@csrf_exempt
+def register_view(request):
+    raw_body = request.body
+    data = json.loads(raw_body.decode('utf-8'))
+    serializer = RegisterSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"success": True}, status = 200)
+    return  Response(serializer.errors, status = 400)
+
+
+@api_view(['POST'])
+@csrf_exempt
 def login_view(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        user = authenticate(request, email=email, password=password)
-        if user is not None:
-            login(request, user)
-            refresh = RefreshToken.for_user(user)
-            response = JsonResponse({"message": "Login successful"})
-            response.set_cookie('access_token', str(refresh.access_token), httponly=True)
-            return response
-    return render(request, 'login.html')
+    raw_body = request.body
+    data = json.loads(raw_body.decode('utf-8'))
+    email = data['email']
+    password = data['password']
+    user = authenticate(request, email=email, password=password)
+    if user is not None:
+        login(request, user)
+        refresh = RefreshToken.for_user(user)
+        response = JsonResponse({"message": "Login successful"})
+        response.set_cookie('access_token', str(refresh.access_token), httponly=True)
+        return response
+    return Response({"error": "Ошибка авторизации"}, status = 400)
 
 
 class UserDetailView(APIView):
@@ -179,6 +191,7 @@ class RouteListCreateView(generics.ListCreateAPIView):
         tags=["Route"]
     )
     def get(self, request, *args, **kwargs):
+        cook = request.COOKIES
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
