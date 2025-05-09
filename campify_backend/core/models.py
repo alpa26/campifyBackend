@@ -170,7 +170,9 @@ class Checklist(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    route_id = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='checklists')
+    route_id = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='checklists', null=True)
+    pdf_url = models.FileField(upload_to='pdf_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
 class ChecklistItems(models.Model):

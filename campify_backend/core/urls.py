@@ -24,6 +24,7 @@ urlpatterns = [
     path('routes/<int:route_id>/reviews/', RouteReviewsView.as_view(), name='route-reviews'),
     path('routes/<int:id>/upload_gpx/', UploadGpxFileView.as_view(), name='upload-gpx'),
     path('routes/<int:pk>/gpx/', GPXFileGetView.as_view(), name='route-gpx-get'),
+    path('routes/<int:pk>/checklist/', DownloadCheckListPdfFileView.as_view(), name='route-checklist-get'),
     path('routes/<int:pk>/download/gpx/', GPXFileDownloadView.as_view(), name='route-gpx-download'),
     path('routes/user/<int:user_id>/', UserRouteGetView.as_view(), name='route-user'),
 
@@ -42,6 +43,7 @@ urlpatterns = [
     path('point_reviews/<int:pk>/', PointReviewRetrieveUpdateDestroyView.as_view(), name='point_review-detail'),
     path('items/', ItemListCreateView.as_view(), name='item-list-create'),
     path('items/<int:pk>/', ItemRetrieveUpdateDestroyView.as_view(), name='item-detail'),
+    path('checklists/upload/', UploadCheckListPdfFileView.as_view(), name='upload-checklist'),
     path('checklists/', ChecklistListCreateView.as_view(), name='checklist-list-create'),
     path('checklists/<int:pk>/', ChecklistRetrieveUpdateDestroyView.as_view(), name='checklist-detail'),
     path('checklists/<int:checklist_id>/items/', ChecklistItemsByIdView.as_view(), name='point-reviews'),

@@ -281,35 +281,63 @@ class RouteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 
-class UploadGpxFileView(APIView):
+class DownloadCheckListPdfFileView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Получение чеклиста в формате PDF",
+        tags=["Route"],
+        responses={
+            200: openapi.Response('PDF файл', schema=openapi.Schema(type=openapi.TYPE_FILE)),
+            404: 'Файл не найден'
+        }
+    )
+    def get(self, request,pk):
+        try:
+            checklist = Checklist.objects.get(name="checklist")
+            pdf_url = checklist.pdf_url
+            if not pdf_url:
+                return Response({"detail": "Файл не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+            response = FileResponse(pdf_url.open('rb'), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_url.name}"'
+            return response
+
+        except Checklist.DoesNotExist:
+            return Response({"detail": "Чеклист не найден."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class UploadCheckListPdfFileView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(
-        operation_summary="Загрузка GPX-файла по ID маршрута",
-        tags=["Route"],
+        operation_summary="Загрузка чеклиста формата PDF",
+        tags=["Checklist"],
         manual_parameters=[
-            openapi.Parameter('id', openapi.IN_PATH, description="ID маршрута", type=openapi.TYPE_INTEGER),
-            openapi.Parameter('gpx_file', openapi.IN_FORM, type=openapi.TYPE_FILE, description="GPX файл")
+            openapi.Parameter('pdf_file', openapi.IN_FORM, type=openapi.TYPE_FILE, description="PDF файл")
         ],
         responses={200: openapi.Response('Файл загружен')}
     )
-    def post(self, request, id):
-        try:
-            route = Route.objects.get(id=id)
-        except Route.DoesNotExist:
-            return Response({"detail": "Маршрут не найден."}, status=status.HTTP_404_NOT_FOUND)
-
-        gpx_file = request.FILES.get('gpx_file')
-        if not gpx_file:
+    def post(self, request):
+        pdf_file = request.FILES.get('pdf_file')
+        if not pdf_file:
             return Response({"detail": "Файл не найден в запросе."}, status=status.HTTP_400_BAD_REQUEST)
+        if not pdf_file.name.lower().endswith('.pdf'):
+            return Response({"detail": "Файл должен быть в формате PDF."}, status=status.HTTP_400_BAD_REQUEST)
 
-        route.gpx_url = gpx_file
-        route.save()
+        name = pdf_file.name[:-4]
+        try:
+            checklist = Checklist.objects.get(name="checklist")
+            if checklist:
+                return Response({"detail": "Файл с таким названием уже существует."}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            checklist_pdf = Checklist.objects.create(
+            name = name,
+            pdf_url =  pdf_file
+            )
 
         return Response({
             "detail": "Файл успешно загружен",
-            "gpx_url": route.gpx_url.url
-        })
+        }, status=status.HTTP_200_OK)
+
 
 
 class RouteReviewsView(generics.ListAPIView):
