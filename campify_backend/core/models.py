@@ -90,7 +90,7 @@ class Route(models.Model):
 
 class RoutePhoto(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='photos')
-    image = models.ImageField(upload_to='campify_backend/route_photos/')
+    image = models.ImageField(upload_to='photos/route_photos/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -131,7 +131,7 @@ class MapPoint(models.Model):
     longitude = models.FloatField()
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    photo_url = models.URLField(blank=True, null=True)
+    image =  models.ImageField(upload_to='photos/point_photos/', null=True)
 
     def __str__(self):
         return self.name

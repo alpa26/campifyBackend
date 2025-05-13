@@ -38,6 +38,9 @@ urlpatterns = [
     path('map_points/', MapPointListCreateView.as_view(), name='map_point-list-create'),
     path('map_points/<int:pk>/', MapPointRetrieveUpdateDestroyView.as_view(), name='map_point-detail'),
     path('map_points/<int:map_points_id>/reviews/', MapPointReviewsView.as_view(), name='point-reviews'),
+    path('map_points/<int:pk>/photo/delete/', DeleteMapPointImageView.as_view(), name='map_point-photo-delete'),
+    path('map_points/<int:pk>/photo_by_id/', MapPointPhotoByIdView.as_view(), name='map_point-photo-get'),
+    path('map_points/<int:pk>/photo', UploadMapPointPhotoView.as_view(), name='map_point-upload'),
 
     path('point_reviews/', PointReviewListCreateView.as_view(), name='point_review-list-create'),
     path('point_reviews/<int:pk>/', PointReviewRetrieveUpdateDestroyView.as_view(), name='point_review-detail'),

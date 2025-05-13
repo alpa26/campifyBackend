@@ -65,6 +65,9 @@ class MapPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = MapPoint
         fields = '__all__'
+        extra_kwargs = {
+            'image': {'required': False}
+        }
 
 class PointReviewSerializer(serializers.ModelSerializer):
     class Meta:
