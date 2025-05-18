@@ -1,8 +1,8 @@
 import json
 
-from django.db.models import Avg
+from django.db.models import Avg, F, Sum, Case, When, FloatField, Value
 from django.http import JsonResponse, FileResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
@@ -14,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from .serializers import *
 from .serializers import RegisterSerializer
+from .models import Route, UserTagPreference
 from drf_yasg.utils import swagger_auto_schema
 
 def access_auth_view(request):
@@ -191,7 +192,6 @@ class RouteListCreateView(generics.ListCreateAPIView):
         tags=["Route"]
     )
     def get(self, request, *args, **kwargs):
-        cook = request.COOKIES
         return super().get(request, *args, **kwargs)
 
     @swagger_auto_schema(
@@ -249,6 +249,43 @@ class WildRouteGetView(generics.ListAPIView):
         return super().get(request, *args, **kwargs)
 
 
+class RecommendedRoutesView(generics.ListAPIView):
+    serializer_class = RouteSerializer
+
+    def get_queryset(self):
+        user_id = self.kwargs.get('user_id')
+        if not user_id:
+            return Route.objects.none()
+
+        user = User.objects.get(id=user_id)
+
+        preferences = UserTagPreference.objects.filter(user=user)
+
+        if not preferences.exists():
+            return Route.objects.filter(is_public=True).order_by('-views')[:10]  # fallback
+
+        whens = [
+            When(tags=pref.tag, then=Value(pref.weight))
+            for pref in preferences
+        ]
+
+        return (
+            Route.objects
+            .filter(is_public=True, tags__in=[p.tag for p in preferences])
+            .annotate(score=Sum(
+                Case(*whens, output_field=FloatField())
+            ))
+            .order_by('-score', '-views')
+            .distinct()
+        )
+
+    @swagger_auto_schema(
+        operation_summary="Список рекомендованных маршрутов для пользователя",
+        tags=["Route"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
 class RouteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
@@ -281,6 +318,49 @@ class RouteRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 
+class UserPreferencesUpdateView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Обновление тегов предпочтений пользователя по user_id и route_id",
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["user_id", "route_id"],
+            properties={
+                'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID пользователя'),
+                'route_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID маршрута'),
+            }
+        )
+    )
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        route_id = request.data.get('route_id')
+
+        if not user_id or not route_id:
+            return Response({'detail': 'user_id и route_id обязательны.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.get(id=user_id)
+        route = Route.objects.get(id=route_id)
+
+
+        self.update_user_preferences(user, route)
+        return Response({'detail': 'Предпочтения обновлены.'}, status=status.HTTP_200_OK)
+
+    def update_user_preferences(self, user, route):
+        STEP = 0.1  # Шаг наращивания
+        tag_ids = route.tags.values_list('id', flat=True)
+        self.decay_user_preferences(user, tag_ids)
+
+        for tag_id in tag_ids:
+            pref, _ = UserTagPreference.objects.get_or_create(user=user, tag_id=tag_id)
+            pref.weight += STEP * (1 - pref.weight)
+            pref.weight = round(min(pref.weight, 1.0), 4)
+            pref.save()
+
+    def decay_user_preferences(self, user, viewed_tag_ids, decay_rate=0.05):
+        # Понижаем веса для всех тегов, которые не участвовали в текущем просмотре
+        UserTagPreference.objects.filter(user=user).exclude(tag_id__in=viewed_tag_ids).update(
+            weight=F('weight') * (1 - decay_rate)
+        )
 class DownloadCheckListPdfFileView(APIView):
     @swagger_auto_schema(
         operation_summary="Получение чеклиста в формате PDF",
@@ -909,9 +989,14 @@ class ChecklistItemsByIdView(generics.ListAPIView):
 
 
 
+# Tags
+class TagListView(generics.ListCreateAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagsItemsSerializer
 
-
-
-
-
-
+    @swagger_auto_schema(
+        operation_summary="Список тегов",
+        tags=["Tags"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)

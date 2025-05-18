@@ -50,6 +50,19 @@ class Role(models.Model):
     def __str__(self):
         return self.name
 
+class Tag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class UserTagPreference(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tag_preferences')
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    weight = models.FloatField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'tag')
 
 class Route(models.Model):
     DIFFICULTY_CHOICES = [
@@ -79,6 +92,7 @@ class Route(models.Model):
         choices=TYPES,
         default=1,
     )
+    tags = models.ManyToManyField(Tag, related_name='routes', blank=True)
     is_public = models.BooleanField(default=True)
     chat_link = models.URLField(blank=True, null=True)
     views = models.IntegerField(null=True, default=0)
