@@ -107,7 +107,7 @@ class RoutePhoto(models.Model):
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='photos')
     image = models.ImageField(upload_to='photos/route_photos/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
+    is_checked = models.BooleanField(default=False)
 
 class RouteReview(models.Model):
     id = models.AutoField(primary_key=True)

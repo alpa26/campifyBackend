@@ -509,13 +509,31 @@ class FavoriteRouteListCreateView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 # RoutePhoto
-class RoutePhotoListCreateView(generics.ListCreateAPIView):
+class RoutePhotoListView(generics.ListCreateAPIView):
     queryset = RoutePhoto.objects.all()
     serializer_class = RoutePhotoSerializer
     http_method_names = ['get']
 
+    def get_queryset(self):
+        return RoutePhoto.objects.filter(is_checked=True)
+
     @swagger_auto_schema(
         operation_summary="Список всех фото к маршрутам",
+        tags=["RoutePhoto"]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+
+class RoutePhotoUnchekedListView(generics.ListCreateAPIView):
+    queryset = RoutePhoto.objects.all()
+    serializer_class = RoutePhotoSerializer
+    http_method_names = ['get']
+
+    def get_queryset(self):
+        return RoutePhoto.objects.filter(is_checked=False)
+
+    @swagger_auto_schema(
+        operation_summary="Список всех непроверенных фото",
         tags=["RoutePhoto"]
     )
     def get(self, request, *args, **kwargs):
@@ -616,12 +634,36 @@ class RoutePhotoRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView)
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 
+class UpdatePhotoValidationStatusView(APIView):
+    serializer_class = ValidationRoutePhotoSerializer
+
+    @swagger_auto_schema(
+        operation_summary="Изменить статус фото к маршруту",
+        request_body=ValidationRoutePhotoSerializer,
+        tags=["RoutePhoto"]
+    )
+    def patch(self, request, pk):
+        try:
+            photo = RoutePhoto.objects.get(pk=pk)
+        except RoutePhoto.DoesNotExist:
+            return Response({"detail": "Photo not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        is_checked = request.data.get('is_checked')
+        if is_checked is None:
+            return Response({"detail": "'is_checked' field is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Обновляем поле
+        photo.is_checked = bool(is_checked)
+        photo.save()
+
+        return Response({"id": photo.id, "is_checked": photo.is_checked}, status=status.HTTP_200_OK)
+
 class RoutePhotoByIdView(generics.ListAPIView):
     serializer_class = RoutePhotoSerializer
 
     def get_queryset(self):
         pk = self.kwargs.get('pk')
-        return RoutePhoto.objects.filter(route=pk)
+        return RoutePhoto.objects.filter(route=pk, is_checked = True)
 
     @swagger_auto_schema(
         operation_summary="Получить фото маршрута по id",
@@ -662,7 +704,6 @@ class UploadRoutePhotoView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 # Фото к локации
-
 class DeleteMapPointImageView(APIView):
     @swagger_auto_schema(
         operation_summary="Удалить изображение у локации",

@@ -30,10 +30,12 @@ urlpatterns = [
     path('routes/user/<int:user_id>/', UserRouteGetView.as_view(), name='route-user'),
     path('routes/recommendation/<int:user_id>', RecommendedRoutesView.as_view(), name='route-recommendation'),
 
-    path('route_photo/', RoutePhotoListCreateView.as_view(), name='route-photo-create'),
+    path('route_photo/', RoutePhotoListView.as_view(), name='route-photo-list'),
+    path('route_photo/unchecked/', RoutePhotoUnchekedListView.as_view(), name='route-photo-unchecked'),
     path('route_photo/<int:pk>/', RoutePhotoRetrieveUpdateDestroyView.as_view(), name='route-photo-detail'),
     path('routes/<int:pk>/photos/', RoutePhotoByIdView.as_view(), name='route-photo-list'),
     path('route_photo/<int:id>/upload_image/', UploadRoutePhotoView.as_view(), name='upload-file'),
+    path('route_photo/<int:pk>/check/', UpdatePhotoValidationStatusView.as_view(), name='update-photo-check'),
 
     path('route_reviews/', RouteReviewListCreateView.as_view(), name='route_review-list-create'),
     path('route_reviews/<int:pk>/', RouteReviewRetrieveUpdateDestroyView.as_view(), name='route_review-detail'),

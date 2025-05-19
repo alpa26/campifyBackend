@@ -49,7 +49,12 @@ class RouteSerializer(serializers.ModelSerializer):
 class RoutePhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = RoutePhoto
-        fields = ['id', 'route', 'image', 'uploaded_at']
+        fields = ['id', 'route', 'image', 'uploaded_at', 'is_checked']
+
+class ValidationRoutePhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoutePhoto
+        fields = ['is_checked']
 
 class RouteReviewSerializer(serializers.ModelSerializer):
     class Meta:
