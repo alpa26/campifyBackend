@@ -23,7 +23,11 @@ def access_auth_view(request):
 def home_view(request):
     return render(request, 'home.html')
 
-
+@swagger_auto_schema(
+    method='post',
+    request_body=RegisterSerializer,
+    responses={200: "Success", 400: "Bad Request"}
+)
 @api_view(['POST'])
 @csrf_exempt
 def register_view(request):
@@ -35,7 +39,18 @@ def register_view(request):
         return Response({"success": True}, status = 200)
     return  Response(serializer.errors, status = 400)
 
-
+@swagger_auto_schema(
+    method='post',
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['email', 'password'],
+        properties={
+            'email': openapi.Schema(type=openapi.TYPE_STRING),
+            'password': openapi.Schema(type=openapi.TYPE_STRING),
+        },
+    ),
+    responses={200: "Success", 400: "Bad Request"}
+)
 @api_view(['POST'])
 @csrf_exempt
 def login_view(request):
