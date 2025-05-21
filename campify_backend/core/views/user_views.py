@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics
 from ..serializers import *
 from drf_yasg.utils import swagger_auto_schema
+from django.db.models import F
 
 @swagger_auto_schema(
     method='post',

@@ -1,3 +1,5 @@
+import re
+
 from django.db.models import Avg, F, Sum, Case, When, FloatField, Value
 from django.http import FileResponse
 from drf_yasg import openapi
@@ -8,6 +10,109 @@ from rest_framework import status, generics
 from ..serializers import *
 from ..models import *
 from drf_yasg.utils import swagger_auto_schema
+
+
+def create_tags_for_route(data):
+    tags = []
+
+    if data.get('difficulty') == 1:
+        tags.append('новичок')
+        tags.append('легко')
+    elif data.get('difficulty') == 2:
+        tags.append('кемпинг')
+        tags.append('средне')
+    elif data.get('difficulty') == 3:
+        tags.append('опытный')
+        tags.append('сложно')
+    elif data.get('difficulty') == 4:
+        tags.append('профи')
+        tags.append('сложно')
+
+    if data.get('type') == 1:
+        tags.append('глэмпинг')
+        tags.append('укрытие')
+    elif data.get('type') == 2:
+        tags.append('дикий')
+        tags.append('экстрим')
+
+    if data.get('duration'):
+        duration = data['duration']
+        total_hours = duration.total_seconds() // 3600
+        if total_hours <= 8:
+            tags.append('1_день')
+        elif 8 < total_hours <= 18:
+            tags.append('выходные')
+        elif 18 < total_hours <= 150:
+            tags.append('неделя')
+        else:
+            tags.append('экспедиция')
+
+    text = f"{data.get('description', '') or ''} {data.get('name', '') or ''}".lower()
+
+    if 'пешком' in text or 'пеший' in text or 'ногами' in text:
+        tags.append('пеший')
+    if 'сплав' in text or 'байдарк' in text or 'SUP' in text:
+        tags.append('сплав')
+    if 'фото' in text or 'пейзаж' in text:
+        tags.append('фото')
+    if 'пещер' in text or 'ущель' in text:
+        tags.append('пещеры')
+    if 'йог' in text or 'медитац' in text:
+        tags.append('релакс')
+
+    if 'машин' in text or 'авто' in text or 'колес' in text:
+        tags.append('комфорт_авто')
+        tags.append('транспорт')
+
+    if 'аренда' in text:
+        if 'палатка' in text or 'спальник' in text:
+            tags.append('аренда_снаряжение')
+        if 'газов' in text or 'горелк' in text:
+            tags.append('аренда_кухня')
+        if 'байдар' in text or 'велосипед' in text:
+            tags.append('аренда_транспорт')
+    else:
+        tags.append('без_аренды')
+
+    if 'гора' in text or 'горы' in text:
+        tags.append('горы')
+    if 'озер' in text or 'рек' in text or 'мор' in text  or 'водоем' in text:
+        tags.append('вода')
+    if 'лес' in text or re.search(r'\bрощ[аеиуыюя]\b', text) or 'бор' in text:
+        tags.append('лес')
+    if 'истор' in text or 'заброшк' in text or 'петроглиф' in text:
+        tags.append('история')
+    if 'малоизвест' in text or 'секрет' in text:
+        tags.append('секретные')
+
+    if 'один' in text or 'друзья' in text:
+        tags.append('взрослые')
+    if (re.search(r'\bдет(и|ям|ями|ях)\b', text) or
+            re.search(r'\bреб(ё|е)н(ка|ок|ку|ке)\b', text)):
+        tags.append('дети')
+    if 'собак' in text or 'пёс' in text:
+        tags.append('с_собакой')
+    if 'групп' in text or 'гид' in text:
+        tags.append('группа')
+
+    if 'летом' in text or 'лет' in text:
+        tags.append('лето')
+    if 'осень' in text:
+        tags.append('осень')
+    if 'зим' in text:
+        tags.append('зима')
+    if 'весн' in text:
+        tags.append('весна')
+
+    if 'экстрим' in text:
+        tags.append('экстрим')
+    if 'природ' in text:
+        tags.append('природа')
+    if 'культур' in text:
+        tags.append('культура')
+
+    return tags
+
 
 class RouteListCreateView(generics.ListCreateAPIView):
     queryset = Route.objects.all()
@@ -23,6 +128,8 @@ class RouteListCreateView(generics.ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+
+
     @swagger_auto_schema(
         operation_summary="Создание нового маршрута",
         tags=["Route"]
@@ -34,7 +141,12 @@ class RouteListCreateView(generics.ListCreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        # Возвращаем только ID
+
+        instance = serializer.instance
+        tags = create_tags_for_route(serializer.validated_data)
+        tag_objs = [Tag.objects.get_or_create(name=tag)[0] for tag in tags]
+        instance.tags.set(tag_objs)
+
         return Response({'id': serializer.instance.id}, status=status.HTTP_201_CREATED)
 
 
