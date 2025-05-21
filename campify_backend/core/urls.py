@@ -1,14 +1,20 @@
 from django.urls import path
-from .views import *
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views.user_views import *
+from .views.role_views import *
+from .views.route_views import *
+from .views.tag_views import *
+from .views.image_views import *
+from .views.mappoint_views import *
+from .views.checklist_views import *
+from .views.item_views import *
 
 urlpatterns = [
     path('login/', login_view, name='login'),
     path('register/', register_view, name='register'),
     #path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     #path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('access/', access_auth_view, name='access'),
-    path('user/<str:user_id>/', UserDetailView.as_view(), name='user_detail'),
+    #path('access/', access_auth_view, name='access'),
+    path('users/<str:user_id>/', UserDetailView.as_view(), name='user_detail'),
     path('users/<str:username>/', UserByUsernameView.as_view(), name='user-by-username'),
 
     #path('users/<int:user_id>/route_reviews/', UserRouteReviewsView.as_view(), name='user-route-reviews'),
