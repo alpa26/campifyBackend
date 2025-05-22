@@ -85,7 +85,8 @@ class DownloadCheckListPdfFileView(APIView):
     )
     def get(self, request,pk):
         try:
-            checklist = Checklist.objects.get(name="checklist")
+            checklist_name = self.get_checkist_name(pk)
+            checklist = Checklist.objects.get(name=checklist_name)
             pdf_url = checklist.pdf_url
             if not pdf_url:
                 return Response({"detail": "Файл не найден."}, status=status.HTTP_404_NOT_FOUND)
@@ -97,6 +98,17 @@ class DownloadCheckListPdfFileView(APIView):
         except Checklist.DoesNotExist:
             return Response({"detail": "Чеклист не найден."}, status=status.HTTP_404_NOT_FOUND)
 
+    def get_checkist_name(self, route_id):
+        route = Route.objects.get(id=route_id)
+        tag_names = route.tags.values_list('name', flat=True)
+        if '1_день' in tag_names:
+            return 'checklist_for_a_day'
+        elif {'глэмпинг','укрытие'} & set(tag_names):
+            return 'checklist_for_glamping'
+        elif {'обустроенный'} & set(tag_names):
+            return 'checklist_for_equipped_route'
+        else:
+            return 'wild_checklist'
 
 class UploadCheckListPdfFileView(APIView):
     parser_classes = [MultiPartParser, FormParser]

@@ -19,7 +19,6 @@ def create_tags_for_route(data):
         tags.append('новичок')
         tags.append('легко')
     elif data.get('difficulty') == 2:
-        tags.append('кемпинг')
         tags.append('средне')
     elif data.get('difficulty') == 3:
         tags.append('опытный')
@@ -29,8 +28,7 @@ def create_tags_for_route(data):
         tags.append('сложно')
 
     if data.get('type') == 1:
-        tags.append('глэмпинг')
-        tags.append('укрытие')
+        tags.append('обустроенный')
     elif data.get('type') == 2:
         tags.append('дикий')
         tags.append('экстрим')
@@ -59,6 +57,13 @@ def create_tags_for_route(data):
         tags.append('пещеры')
     if 'йог' in text or 'медитац' in text:
         tags.append('релакс')
+
+    if 'глэмпинг' in text:
+        tags.append('глэмпинг')
+        tags.append('укрытие')
+    if 'кемпинг' in text:
+        tags.append('кемпинг')
+
 
     if 'машин' in text or 'авто' in text or 'колес' in text:
         tags.append('комфорт_авто')
