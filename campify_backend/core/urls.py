@@ -20,7 +20,8 @@ urlpatterns = [
     #path('users/<int:user_id>/route_reviews/', UserRouteReviewsView.as_view(), name='user-route-reviews'),
     #path('users/<int:user_id>/point_reviews/', UserPointReviewsView.as_view(), name='user-point-reviews'),
     path('users/<int:user_id>/favorite_routes/', UserFavoriteRouteReviewsView.as_view(), name='user-favorite-routes'),
-    path('user/preferences/update', UserPreferencesUpdateView.as_view(), name='user-preferences'),
+    path('user/preferences/create', UserPreferencesCreateView.as_view(), name='user-preferences-create'),
+    path('user/preferences/update', UserPreferencesUpdateView.as_view(), name='user-preferences-update'),
 
     path('roles/', RoleListCreateView.as_view(), name='role-list-create'),
     path('roles/<int:pk>/', RoleRetrieveUpdateDestroyView.as_view(), name='role-detail'),

@@ -126,6 +126,59 @@ class UserFavoriteRouteReviewsView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
 
+class UserPreferencesCreateView(APIView):
+    @swagger_auto_schema(
+        operation_summary="Добавление тегов предпочтений пользователя по входному тестированию",
+        tags=["User"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["user_id", "tags"],
+            properties={
+                'user_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='ID пользователя'),
+                'tags': openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_STRING),
+                    description="Список тегов"
+                ),
+            }
+        )
+    )
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id")
+        tags = request.data.get("tags", [])
+
+        if not user_id or not isinstance(tags, list):
+            return Response({'detail': 'user_id и tags обязательны.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "Пользователь не найден"}, status=status.HTTP_404_NOT_FOUND)
+
+        for tag_name in tags:
+            tag, _ = Tag.objects.get_or_create(name=tag_name)
+            preference, created = UserTagPreference.objects.get_or_create(user=user, tag=tag)
+            preference.weight = 0.5  # фиксированный вес
+            preference.save()
+
+        return Response({'detail': 'Предпочтения обновлены.'}, status=status.HTTP_200_OK)
+
+    def update_user_preferences(self, user, route):
+        STEP = 0.1  # Шаг наращивания
+        tag_ids = route.tags.values_list('id', flat=True)
+        self.decay_user_preferences(user, tag_ids)
+
+        for tag_id in tag_ids:
+            pref, _ = UserTagPreference.objects.get_or_create(user=user, tag_id=tag_id)
+            pref.weight += STEP * (1 - pref.weight)
+            pref.weight = round(min(pref.weight, 1.0), 4)
+            pref.save()
+
+    def decay_user_preferences(self, user, viewed_tag_ids, decay_rate=0.05):
+        # Понижаем веса для всех тегов, которые не участвовали в текущем просмотре
+        UserTagPreference.objects.filter(user=user).exclude(tag_id__in=viewed_tag_ids).update(
+            weight=F('weight') * (1 - decay_rate)
+        )
 
 class UserPreferencesUpdateView(APIView):
     @swagger_auto_schema(
