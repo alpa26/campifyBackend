@@ -161,24 +161,9 @@ class UserPreferencesCreateView(APIView):
             preference.weight = 0.5  # фиксированный вес
             preference.save()
 
+        user.is_pass_test = True;
+        user.save()
         return Response({'detail': 'Предпочтения обновлены.'}, status=status.HTTP_200_OK)
-
-    def update_user_preferences(self, user, route):
-        STEP = 0.1  # Шаг наращивания
-        tag_ids = route.tags.values_list('id', flat=True)
-        self.decay_user_preferences(user, tag_ids)
-
-        for tag_id in tag_ids:
-            pref, _ = UserTagPreference.objects.get_or_create(user=user, tag_id=tag_id)
-            pref.weight += STEP * (1 - pref.weight)
-            pref.weight = round(min(pref.weight, 1.0), 4)
-            pref.save()
-
-    def decay_user_preferences(self, user, viewed_tag_ids, decay_rate=0.05):
-        # Понижаем веса для всех тегов, которые не участвовали в текущем просмотре
-        UserTagPreference.objects.filter(user=user).exclude(tag_id__in=viewed_tag_ids).update(
-            weight=F('weight') * (1 - decay_rate)
-        )
 
 class UserPreferencesUpdateView(APIView):
     @swagger_auto_schema(
