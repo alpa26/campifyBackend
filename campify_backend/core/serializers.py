@@ -21,7 +21,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email','phone','telegram','whatsapp','description','role_id','created_at','last_login','is_pass_test')
+        fields = ('id','username', 'email','phone','telegram','whatsapp','description','role_id','created_at','last_login','is_pass_test')
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta:
