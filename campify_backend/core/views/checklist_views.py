@@ -130,7 +130,7 @@ class UploadCheckListPdfFileView(APIView):
 
         name = pdf_file.name[:-4]
         try:
-            checklist = Checklist.objects.get(name="checklist")
+            checklist = Checklist.objects.get(name=name)
             if checklist:
                 return Response({"detail": "Файл с таким названием уже существует."}, status=status.HTTP_400_BAD_REQUEST)
         except:
