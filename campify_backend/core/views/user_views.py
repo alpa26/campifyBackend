@@ -51,7 +51,7 @@ def login_view(request):
     if user is not None:
         login(request, user)
         refresh = RefreshToken.for_user(user)
-        response = JsonResponse({"message": "Login successful"})
+        response = JsonResponse({"user_id": user.id})
         response.set_cookie('access_token', str(refresh.access_token), httponly=True)
         return response
     return Response({"error": "Ошибка авторизации"}, status = 400)
